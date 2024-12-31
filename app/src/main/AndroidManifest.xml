@@ -30,6 +30,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MovieTMDB"
         tools:targetApi="tiramisu">
+        <profileable
+            android:shell="true"
+            tools:targetApi="29" />
+
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
             android:enabled="false"
