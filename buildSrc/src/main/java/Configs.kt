@@ -34,7 +34,7 @@ object Configs {
     const val MIN_SDK = 24
     const val TARGET_SDK = 34
 
-    const val ANDROID_JUNIT_RUNNER = "androidx.test.runner.AndroidJUnitRunner"
+    const val ANDROID_JUNIT_RUNNER = "com.truongdc.movie.core.testing.MovieTestRunner"
 
     const val PROGUARD_FILE = "proguard-android-optimize.txt"
     const val PROGUARD_RULES = "proguard-rules.pro"

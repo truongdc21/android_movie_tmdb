@@ -18,6 +18,7 @@ rootProject.name = "android_movie_tmdb"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 include(":app")
+include(":macrobenchmark")
 include(":core:data")
 include(":core:model")
 include(":core:common")
@@ -29,11 +30,20 @@ include(":core:navigation")
 include(":core:state")
 include(":core:viewmodel")
 include(":core:ui")
+include(":core:testing")
 
 include(":feature:login")
 include(":feature:register")
 include(":feature:movie_list")
 include(":feature:movie_detail")
 include(":feature:settings")
+
 include(":lint")
-include(":core:testing")
+
+check(JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17)) {
+    """
+    Movie app requires JDK 17+ but it is currently using JDK ${JavaVersion.current()}.
+    Java Home: [${System.getProperty("java.home")}]
+    https://developer.android.com/build/jdks#jdk-config-in-studio
+    """.trimIndent()
+}

@@ -26,6 +26,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -47,9 +48,10 @@ fun PrimaryTextField(
     primaryColor: Color? = null,
     onPrimaryColor: Color? = null,
     @SuppressLint("ModifierParameter") modifier: Modifier? = null,
+    testTag: String? = null,
 ) {
     TextField(
-        modifier = modifier ?: Modifier
+        modifier = (modifier ?: Modifier).testTag(testTag ?: "")
             .fillMaxWidth()
             .padding(paddingValues),
         value = value,

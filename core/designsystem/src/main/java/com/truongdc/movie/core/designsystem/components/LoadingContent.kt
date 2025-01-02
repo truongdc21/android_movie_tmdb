@@ -25,6 +25,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 
 @ExperimentalComposeUiApi
 @Composable
@@ -50,7 +51,7 @@ fun Loading(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxSize()
-            .clickable { },
+            .testTag("loading_content"),
         contentAlignment = Alignment.Center,
     ) {
         CircularProgressIndicator(
