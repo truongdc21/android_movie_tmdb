@@ -32,6 +32,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.metrics.performance.JankStats
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.truongdc.movie.core.designsystem.theme.MovieTMDBTheme
@@ -39,6 +41,7 @@ import com.truongdc.movie.core.model.DarkThemeConfig
 import com.truongdc.movie.core.model.Language
 import com.truongdc.movie.core.model.ThemeBrand
 import com.truongdc.movie.core.navigation.AppNavigator
+import com.truongdc.movie.core.ui.TrackDisposableJank
 import com.truongdc.movie.ui.MovieTMDBApp
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -48,6 +51,9 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var lazyStats: dagger.Lazy<JankStats>
 
     @Inject
     lateinit var appNavigator: AppNavigator
@@ -82,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val isDarkTheme = shouldDarkTheme(uiState = uiState)
             val navHostController = rememberNavController()
-            initializeNavigation(navHostController)
+            InitializeNavigation(navHostController)
             DisposableEffect(isDarkTheme) {
                 enableEdgeToEdge(
                     statusBarStyle = SystemBarStyle.auto(
@@ -108,7 +114,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun initializeNavigation(
+    override fun onResume() {
+        super.onResume()
+        lazyStats.get().isTrackingEnabled = true
+    }
+
+    override fun onPause() {
+        super.onPause()
+        lazyStats.get().isTrackingEnabled = false
+    }
+
+    @Composable
+    private fun InitializeNavigation(
         navHostController: NavHostController,
         shouldLogNavigation: Boolean = BuildConfig.DEBUG,
     ) {
@@ -120,6 +137,7 @@ class MainActivity : AppCompatActivity() {
                 observeDestinationChanges()
                 observerCurrentStack(lifecycleScope)
             }
+            NavigationTrackingSideEffect(navController)
         }
     }
 
@@ -159,6 +177,20 @@ class MainActivity : AppCompatActivity() {
             DarkThemeConfig.FOLLOW_SYSTEM -> isSystemInDarkTheme()
             DarkThemeConfig.LIGHT -> false
             DarkThemeConfig.DARK -> true
+        }
+    }
+
+    @Composable
+    private fun NavigationTrackingSideEffect(navController: NavHostController) {
+        TrackDisposableJank(navController) { metricsHolder ->
+            val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
+                metricsHolder.state?.putState("Navigation", destination.route.toString())
+            }
+            navController.addOnDestinationChangedListener(listener)
+
+            onDispose {
+                navController.removeOnDestinationChangedListener(listener)
+            }
         }
     }
 

@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -123,7 +124,7 @@ private fun RegisterContent(
                     top = paddingTopContent,
                     start = paddingHorizontalContent,
                     end = paddingHorizontalContent,
-                ),
+                ).testTag("register_content"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
@@ -144,6 +145,7 @@ private fun RegisterContent(
                     paddingValues = PaddingValues(
                         top = if (AppTheme.orientation.isLandscape()) 10.dp else 50.dp,
                     ),
+                    testTag = "email",
                 )
                 PrimaryTextField(
                     value = name,
@@ -152,6 +154,7 @@ private fun RegisterContent(
                     paddingValues = PaddingValues(
                         top = if (AppTheme.orientation.isLandscape()) 10.dp else 20.dp,
                     ),
+                    testTag = "name",
                 )
             } else {
                 Row {
@@ -160,6 +163,7 @@ private fun RegisterContent(
                         onValueChange = onEmailChange,
                         textPlaceholder = stringResource(id = string.mail_id),
                         modifier = Modifier.weight(1f),
+                        testTag = "email",
                     )
                     Spacer(modifier = Modifier.size(10.dp))
                     PrimaryTextField(
@@ -167,6 +171,7 @@ private fun RegisterContent(
                         onValueChange = onNameChange,
                         textPlaceholder = stringResource(id = string.fullname),
                         modifier = Modifier.weight(1f),
+                        testTag = "name",
                     )
                 }
             }
@@ -179,6 +184,7 @@ private fun RegisterContent(
                     top = if (AppTheme.orientation.isLandscape()) 10.dp else 20.dp,
                 ),
                 modifier = null,
+                testTag = "password",
             )
             Spacer(
                 modifier = Modifier.size(
@@ -191,6 +197,7 @@ private fun RegisterContent(
                 },
                 label = stringResource(id = string.register),
                 isEnable = !isInValid,
+                modifier = Modifier.testTag("btn_register"),
             )
             Spacer(modifier = Modifier.weight(1f))
             if (AppTheme.orientation.isPortrait()) {

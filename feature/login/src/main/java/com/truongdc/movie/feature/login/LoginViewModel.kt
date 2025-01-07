@@ -20,6 +20,7 @@ import com.truongdc.movie.core.data.repository.MainRepository
 import com.truongdc.movie.core.state.UiStateDelegateImpl
 import com.truongdc.movie.core.viewmodel.UiStateViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -57,15 +58,12 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun checkInvalid() {
-        if (uiState.email.length < 6 || uiState.pass.length < 6) {
-            asyncUpdateUiState(viewModelScope) { state -> state.copy(isInValid = true) }
-        } else {
-            asyncUpdateUiState(viewModelScope) { state -> state.copy(isInValid = false) }
-        }
+        val isInValid = uiState.email.length < 6 || uiState.pass.length < 6
+        asyncUpdateUiState(viewModelScope) { state -> state.copy(isInValid = isInValid) }
     }
 
     fun onSubmitLogin(email: String, pass: String) = viewModelScope.launch {
-        mainRepository.user.collect { user ->
+        mainRepository.user.firstOrNull()?.let { user ->
             showLoading()
             if (user.email == email && user.password == pass) {
                 mainRepository.setIsLogin(true)

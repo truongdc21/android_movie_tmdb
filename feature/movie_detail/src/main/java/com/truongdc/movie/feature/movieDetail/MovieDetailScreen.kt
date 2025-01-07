@@ -17,15 +17,29 @@ package com.truongdc.movie.feature.movieDetail
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.truongdc.movie.core.common.constant.Constants
@@ -54,29 +68,93 @@ fun MovieDetailScreen(
 
 @Composable
 private fun MovieDetailContent(movie: Movie) {
-    if (AppTheme.orientation.isPortrait()) {
-        Column(Modifier.fillMaxSize()) {
-            ImageMovie(
-                urlImage = movie.urlImage,
-                modifier = Modifier
-                    .fillMaxWidth(1f)
-                    .fillMaxHeight(0.4f),
-            )
+    val isPortrait = AppTheme.orientation.isPortrait()
+
+    if (isPortrait) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            MovieHeader(movie = movie, isPortrait = true)
+            MovieDescription(movie = movie)
         }
     } else {
-        Row(Modifier.fillMaxSize()) {
-            ImageMovie(
-                urlImage = movie.urlImage,
-                modifier = Modifier
-                    .fillMaxHeight(1f)
-                    .fillMaxWidth(0.4f),
-            )
+        Row(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            MovieHeader(movie = movie, isPortrait = false)
+            MovieDescription(movie = movie)
         }
     }
 }
 
 @Composable
-private fun ImageMovie(urlImage: String, modifier: Modifier) {
+private fun MovieHeader(movie: Movie, isPortrait: Boolean) {
+    val boxModifier = if (isPortrait) {
+        Modifier
+            .fillMaxWidth()
+            .height(400.dp)
+    } else {
+        Modifier
+            .width(500.dp)
+            .fillMaxHeight()
+    }
+
+    val imageModifier = if (isPortrait) {
+        Modifier
+            .fillMaxWidth()
+            .height(330.dp)
+    } else {
+        Modifier
+            .fillMaxHeight()
+            .width(430.dp)
+    }
+
+    val circleImageAlignment = if (isPortrait) Alignment.BottomStart else Alignment.TopEnd
+
+    Box(modifier = boxModifier) {
+        BackDropMovieImage(
+            urlImage = movie.backDropImage,
+            modifier = imageModifier,
+        )
+        MovieCircleImage(
+            urlImage = movie.urlImage,
+            modifier = Modifier
+                .size(140.dp)
+                .padding(16.dp)
+                .clip(CircleShape)
+                .border(2.dp, Color.White, CircleShape)
+                .align(circleImageAlignment),
+        )
+    }
+}
+
+@Composable
+private fun MovieDescription(movie: Movie) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+    ) {
+        item { Text(movie.title, style = AppTheme.styles.titleMedium) }
+        item { Spacer(modifier = Modifier.padding(top = 10.dp)) }
+        item { Text(movie.overView, style = AppTheme.styles.bodyMedium) }
+    }
+}
+
+@Composable
+private fun MovieCircleImage(urlImage: String, modifier: Modifier) {
+    Image(
+        painter = rememberAsyncImagePainter(
+            Constants.BASE_URL_IMAGE + urlImage,
+        ),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun BackDropMovieImage(urlImage: String, modifier: Modifier) {
     val painter = rememberAsyncImagePainter(
         Constants.BASE_URL_IMAGE + urlImage,
     )
@@ -84,7 +162,7 @@ private fun ImageMovie(urlImage: String, modifier: Modifier) {
         painter = painter,
         contentDescription = null,
         modifier = modifier,
-        contentScale = ContentScale.FillBounds,
+        contentScale = ContentScale.Crop,
     )
 }
 

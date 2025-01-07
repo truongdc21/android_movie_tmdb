@@ -20,11 +20,18 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 apply("org.jetbrains.kotlin.android")
                 apply("movie_tmdb.android.lint")
             }
-
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
                 defaultConfig.targetSdk = 34
-                defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+                if (path != ":microbenchmark") {
+                    defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+                } else {
+                    defaultConfig.testInstrumentationRunner = "androidx.benchmark.junit4.AndroidBenchmarkRunner"
+
+                    // Config to can run testing benchmark on emulator
+                    // Warning: Should run testing benchmark on real device
+                    defaultConfig.testInstrumentationRunnerArguments["androidx.benchmark.suppressErrors"] = "EMULATOR,LOW-BATTERY"
+                }
                 testOptions.animationsDisabled = true
                 configureFlavors(this)
                 configureGradleManagedDevices(this)

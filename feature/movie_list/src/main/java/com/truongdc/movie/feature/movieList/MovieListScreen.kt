@@ -33,6 +33,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -48,6 +49,7 @@ import com.truongdc.movie.core.designsystem.dimens.Orientation
 import com.truongdc.movie.core.designsystem.icons.AppIcons
 import com.truongdc.movie.core.designsystem.theme.AppTheme
 import com.truongdc.movie.core.model.Movie
+import com.truongdc.movie.core.ui.TrackScrollJank
 import com.truongdc.movie.core.ui.UiStateContent
 import com.truongdc.movie.feature.movieList.components.MovieItem
 
@@ -94,24 +96,27 @@ private fun MoviesContent(
 ) {
     uiState.flowPagingMovie?.let { pagingData ->
         val pagingItems = pagingData.collectAsLazyPagingItems()
-        val countColumns: Int = if (AppTheme.orientation == Orientation.Portrait) {
+        val countColumns: Int = if (AppTheme.orientation.isPortrait()) {
             2
         } else {
             if (AppTheme.windowType.isGreaterThanCompact()) 5 else 4
         }
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().testTag("movie_list:movies"),
         ) {
+            TrackScrollJank(uiState.lazyGridState, "movie_list:screen")
             LazyVerticalGrid(
                 state = uiState.lazyGridState,
                 columns = GridCells.Fixed(countColumns),
                 modifier = Modifier.padding(paddingValues),
             ) {
                 items(pagingItems.itemCount) { index ->
-                    MovieItem(
-                        movie = pagingItems[index]!!,
-                        onClickItem = { movieId -> onTapMovie(movieId) },
-                    )
+                    pagingItems[index]?.let { item ->
+                        MovieItem(
+                            movie = item,
+                            onClickItem = { movieId -> onTapMovie(movieId) },
+                        )
+                    }
                 }
                 buildLoadState(pagingItems)
             }

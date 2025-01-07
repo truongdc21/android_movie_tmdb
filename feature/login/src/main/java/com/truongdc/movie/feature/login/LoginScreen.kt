@@ -37,6 +37,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -127,7 +128,8 @@ private fun LoginContent(
                     top = paddingTopContent,
                     start = paddingHorizontalContent,
                     end = paddingHorizontalContent,
-                ),
+                )
+                .testTag("login_content"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
@@ -148,6 +150,7 @@ private fun LoginContent(
                 paddingValues = PaddingValues(
                     top = if (AppTheme.orientation.isLandscape()) 10.dp else 50.dp,
                 ),
+                testTag = "email",
             )
             PrimaryTextField(
                 value = pass,
@@ -157,6 +160,7 @@ private fun LoginContent(
                 paddingValues = PaddingValues(
                     top = if (AppTheme.orientation.isLandscape()) 10.dp else 20.dp,
                 ),
+                testTag = "password",
             )
             Spacer(
                 modifier = Modifier.size(
@@ -183,23 +187,25 @@ private fun LoginContent(
                     keyboardController?.hide()
                     onSubmitLogin(email, pass)
                 },
+                modifier = Modifier.testTag("btn_login"),
             )
             Spacer(modifier = Modifier.weight(1f))
             if (AppTheme.orientation.isPortrait()) {
                 Text(
-                    text = stringResource(id = string.create_account).uppercase(),
-                    style = AppTheme.styles.bodyLarge.copy(
-                        textDecoration = TextDecoration.Underline,
-                    ),
-                    fontWeight = FontWeight.W500,
-                    color = AppTheme.colors.onPrimary,
                     modifier = Modifier
                         .padding(bottom = 30.dp)
                         .pointerInput(Unit) {
                             detectTapGestures(onTap = {
                                 onNavigateRegister()
                             })
-                        },
+                        }
+                        .testTag("btn_create_account"),
+                    text = stringResource(id = string.create_account).uppercase(),
+                    style = AppTheme.styles.bodyLarge.copy(
+                        textDecoration = TextDecoration.Underline,
+                    ),
+                    fontWeight = FontWeight.W500,
+                    color = AppTheme.colors.onPrimary,
                 )
             }
         }

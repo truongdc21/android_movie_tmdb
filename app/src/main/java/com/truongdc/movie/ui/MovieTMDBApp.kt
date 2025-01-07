@@ -24,8 +24,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.truongdc.movie.core.designsystem.R.string
 import com.truongdc.movie.core.navigation.AppNavigator
@@ -37,6 +40,7 @@ import com.truongdc.movie.feature.movieList.navigation.MovieListRouter
 import com.truongdc.movie.feature.setting.SettingsDialog
 import com.truongdc.movie.navigation.MovieNavHost
 
+@OptIn(ExperimentalComposeUiApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MovieTMDBApp(
@@ -100,6 +104,9 @@ fun MovieTMDBApp(
         }
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
+            modifier = Modifier.semantics {
+                testTagsAsResourceId = true
+            },
         ) {
             uiState.isLogin?.let { isLogin ->
                 MovieNavHost(

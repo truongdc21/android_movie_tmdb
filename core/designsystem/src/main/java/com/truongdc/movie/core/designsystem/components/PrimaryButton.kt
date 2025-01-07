@@ -43,6 +43,7 @@ fun PrimaryButton(
     onClick: () -> Unit = {},
     roundedCornerShape: Dp = 24.dp,
     paddingValues: PaddingValues = PaddingValues(top = 8.dp, bottom = 8.dp),
+    modifier: Modifier = Modifier,
 ) {
     Button(
         enabled = isEnable,
@@ -57,7 +58,7 @@ fun PrimaryButton(
             pressedElevation = 15.dp,
             disabledElevation = 0.dp,
         ),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Text(
             text = label,

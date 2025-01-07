@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 plugins {
     alias(libs.plugins.movieTMDB.android.application)
     alias(libs.plugins.movieTMDB.android.application.compose)
@@ -27,13 +28,11 @@ plugins {
 }
 
 android {
-    namespace = Configs.NAMESPACE
-
     defaultConfig {
         applicationId = Configs.APP_ID
         versionCode = Configs.VERSION_CODE
         versionName = Configs.VERSION_NAME
-
+        // Custom test runner to set up Hilt dependency graph
         testInstrumentationRunner = Configs.ANDROID_JUNIT_RUNNER
         vectorDrawables {
             useSupportLibrary = true
@@ -41,20 +40,14 @@ android {
     }
 
     buildTypes {
-        getByName(Builds.Release.name) {
-            isMinifyEnabled = Builds.Release.isMinifyEnabled
-            isShrinkResources = Builds.Release.isShrinkResources
-            signingConfig = signingConfigs[Builds.Debug.name]
-            isDebuggable = Builds.Release.isDebuggable
+        release {
+            // Set [isMinifyEnabled] and [isShrinkResources] to false for testing benchmark
+            // because have some thing errors with proguard - R8
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(getDefaultProguardFile(Configs.PROGUARD_FILE), Configs.PROGUARD_RULES)
-        }
-
-        getByName(Builds.Debug.name) {
-            isMinifyEnabled = Builds.Debug.isMinifyEnabled
-            isShrinkResources = Builds.Debug.isShrinkResources
-            signingConfig = signingConfigs[Builds.Debug.name]
-            isDebuggable = Builds.Debug.isDebuggable
-            proguardFiles(getDefaultProguardFile(Configs.PROGUARD_FILE), Configs.PROGUARD_RULES)
+            signingConfig = signingConfigs.getByName("debug")
+            baselineProfile.automaticGenerationDuringBuild = true
         }
     }
     packaging {
@@ -68,9 +61,11 @@ android {
             isIncludeAndroidResources = true
         }
     }
+    namespace = Configs.NAMESPACE
 }
 
 dependencies {
+    implementation(projects.benchmarkable)
     implementation(projects.feature.login)
     implementation(projects.feature.register)
     implementation(projects.feature.movieList)
@@ -123,6 +118,8 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test)
     androidTestImplementation(libs.hilt.android.testing)
     androidTestImplementation(projects.core.testing)
+
+    baselineProfile(projects.macrobenchmark)
 }
 
 baselineProfile {
@@ -133,3 +130,5 @@ baselineProfile {
     // Make use of Dex Layout Optimizations via Startup Profiles
     dexLayoutOptimization = true
 }
+
+//dependencyGuard at here
