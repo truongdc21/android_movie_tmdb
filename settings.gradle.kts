@@ -38,6 +38,7 @@ include(":core:state")
 include(":core:viewmodel")
 include(":core:ui")
 include(":core:testing")
+include(":core:analytics")
 
 // module features
 include(":feature:login")

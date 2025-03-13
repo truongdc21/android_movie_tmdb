@@ -17,6 +17,7 @@ object Configs {
     const val NAMESPACE_CORE_VIEWMODEL = "$NAMESPACE_CORE.viewmodel"
     const val NAMESPACE_CORE_STATE = "$NAMESPACE_CORE.state"
     const val NAMESPACE_CORE_TESTING = "$NAMESPACE_CORE.testing"
+    const val NAMESPACE_CORE_ANALYTICS = "$NAMESPACE_CORE.analytics"
 
     // Feature namespaces
     const val NAMESPACE_FEATURE = "$NAMESPACE.feature"
