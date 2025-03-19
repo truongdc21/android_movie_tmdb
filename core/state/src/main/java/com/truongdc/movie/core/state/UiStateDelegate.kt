@@ -15,6 +15,7 @@
  */
 package com.truongdc.movie.core.state
 
+import com.truongdc.movie.core.common.exception.base.AppExceptionWrapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -35,13 +36,13 @@ interface UiStateDelegate<UiState, Event> {
 
     val isLoading: StateFlow<Boolean>
 
-    val error: Flow<Throwable>
+    val appExceptionWrapper: Flow<AppExceptionWrapper>
 
     fun showLoading()
 
     fun hideLoading()
 
-    suspend fun onSendError(error: Throwable)
+    suspend fun sendAppException(appExceptionWrapper: AppExceptionWrapper)
 
     val UiStateDelegate<UiState, Event>.uiState: UiState
 
@@ -59,6 +60,7 @@ interface UiStateDelegate<UiState, Event> {
 
 /**
  * @param mutexState A mutex for synchronizing state access.
+ * @param mutexError A mutex for synchronizing error access.
  * @param initialUiState Initial UI state.
  * @param singleLiveEventCapacity Channel capacity for SingleLiveEvent.
  */
@@ -66,12 +68,13 @@ class UiStateDelegateImpl<UiState, Event>(
     initialUiState: UiState,
     singleLiveEventCapacity: Int = Channel.BUFFERED,
     private val mutexState: Mutex = Mutex(),
+    private val mutexError: Mutex = Mutex(),
 ) : UiStateDelegate<UiState, Event> {
 
     private val uiMutableStateFlow = MutableStateFlow(initialUiState)
     private val singleEventChannel = Channel<Event>(singleLiveEventCapacity)
     private val isLoadingStateFlow = MutableStateFlow(false)
-    private val errorChange = Channel<Throwable>(singleLiveEventCapacity)
+    private val appExceptionWrapperChanel = Channel<AppExceptionWrapper>(singleLiveEventCapacity)
 
     override val uiStateFlow: StateFlow<UiState>
         get() = uiMutableStateFlow.asStateFlow()
@@ -82,8 +85,8 @@ class UiStateDelegateImpl<UiState, Event>(
     override val isLoading: StateFlow<Boolean>
         get() = isLoadingStateFlow
 
-    override val error: Flow<Throwable>
-        get() = errorChange.receiveAsFlow()
+    override val appExceptionWrapper: Flow<AppExceptionWrapper>
+        get() = appExceptionWrapperChanel.receiveAsFlow()
 
     override fun showLoading() {
         isLoadingStateFlow.value = true
@@ -93,8 +96,11 @@ class UiStateDelegateImpl<UiState, Event>(
         isLoadingStateFlow.value = false
     }
 
-    override suspend fun onSendError(error: Throwable) {
-        errorChange.send(error)
+    override suspend fun sendAppException(
+        appExceptionWrapper: AppExceptionWrapper,
+    ): Unit = mutexError.withLock {
+        appExceptionWrapperChanel.send(appExceptionWrapper)
+        appExceptionWrapper.exceptionCompleter?.await()
     }
 
     override val UiStateDelegate<UiState, Event>.uiState: UiState

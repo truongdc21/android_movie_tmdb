@@ -1,5 +1,5 @@
 /*
- * Designed and developed by 2024 truongdc21 (Dang Chi Truong)
+ * Designed and developed by 2025 truongdc21 (Dang Chi Truong)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.truongdc.movie.core.common.constant
+package com.truongdc.movie.core.common.exception.base
 
-object Constants {
-    const val BASE_URL = "https://api.themoviedb.org/3/"
-    const val BASE_URL_IMAGE = "https://image.tmdb.org/t/p/w500"
-    const val BASE_API_KEY = "608dc3a0e4c39fe0b691a89554ec2b1f"
-    const val MAX_PAGE_SIZE = 10
-    const val DURATION_SNACK_BAR_SECONDS = 3
+abstract class AppException(
+    val appExceptionType: AppExceptionType,
+) : Exception()
+
+enum class AppExceptionType {
+    REMOTE,
+    PARSE,
+    REMOTE_CONFIG,
+    UNCAUGHT,
+    VALIDATION,
+    FIRESTORE,
+    AUTH,
 }

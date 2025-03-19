@@ -16,10 +16,13 @@
 package com.truongdc.movie.feature.login
 
 import androidx.lifecycle.viewModelScope
+import com.truongdc.movie.core.common.exception.auth.AuthException
+import com.truongdc.movie.core.common.exception.auth.AuthExceptionKind
 import com.truongdc.movie.core.data.repository.MainRepository
 import com.truongdc.movie.core.state.UiStateDelegateImpl
 import com.truongdc.movie.core.viewmodel.UiStateViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -62,16 +65,19 @@ class LoginViewModel @Inject constructor(
         asyncUpdateUiState(viewModelScope) { state -> state.copy(isInValid = isInValid) }
     }
 
-    fun onSubmitLogin(email: String, pass: String) = viewModelScope.launch {
-        mainRepository.user.firstOrNull()?.let { user ->
-            showLoading()
-            if (user.email == email && user.password == pass) {
-                mainRepository.setIsLogin(true)
-                sendEvent(Event.LoginSuccess)
-                hideLoading()
-            } else {
-                sendEvent(Event.LoginFailed)
-                hideLoading()
+    fun onSubmitLogin(email: String, pass: String) {
+        launchSafeTask {
+            delay(2000)
+            mainRepository.user.firstOrNull()?.let { user ->
+                if (user.email != email) {
+                    throw AuthException(AuthExceptionKind.INVALID_EMAIL)
+                } else if (user.password != pass) {
+                    throw AuthException(AuthExceptionKind.INVALID_PASSWORD)
+                } else {
+                    mainRepository.setIsLogin(true)
+                    sendEvent(Event.LoginSuccess)
+                    hideLoading()
+                }
             }
         }
     }

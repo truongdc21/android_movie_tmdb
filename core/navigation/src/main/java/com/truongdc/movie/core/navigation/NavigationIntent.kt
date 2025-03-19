@@ -67,4 +67,11 @@ sealed class NavigationIntent {
     data class ToggleMaintenanceDialog(
         val isVisible: Boolean,
     ) : NavigationIntent()
+
+    /**
+     * Represents an intent to toggle the error dialog visibility.
+     */
+    data class ToggleErrorDialog(
+        val isVisible: Boolean,
+    ) : NavigationIntent()
 }

@@ -20,7 +20,7 @@ import java.io.IOException
 /**
  * Error type
  */
-object Type {
+object ErrorType {
     /**
      * An [IOException] occurred while communicating to the server.
      */

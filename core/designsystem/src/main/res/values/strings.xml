@@ -54,4 +54,7 @@
     <string name="register_success">Register success</string>
     <string name="register_failed_please_try_again">Register failed, Please try again!</string>
     <string name="welcome_to_movie_app">Welcome to movie app!</string>
+    <string name="error">Error</string>
+    <string name="cancel">Cancel</string>
+    <string name="unexpected_error">An unexpected error occurred.</string>
 </resources>

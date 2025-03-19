@@ -62,16 +62,3 @@ fun <State, Event> UiStateDelegate<State, Event>.collectLoading(
         block(it)
     }
 }
-
-fun <State, Event> UiStateDelegate<State, Event>.collectError(
-    lifecycle: Lifecycle,
-    lifecycleState: Lifecycle.State = Lifecycle.State.RESUMED,
-    block: (Throwable) -> Unit,
-): Job = lifecycle.coroutineScope.launch {
-    error.flowWithLifecycle(
-        lifecycle = lifecycle,
-        minActiveState = lifecycleState,
-    ).collect {
-        block(it)
-    }
-}

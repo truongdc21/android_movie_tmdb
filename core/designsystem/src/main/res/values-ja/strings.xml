@@ -54,4 +54,7 @@
     <string name="register_success">登録に成功しました</string>
     <string name="register_failed_please_try_again">登録に失敗しました。もう一度お試しください！</string>
     <string name="welcome_to_movie_app">映画アプリへようこそ！</string>
+    <string name="error">エラー</string>
+    <string name="cancel">キャンセル</string>
+    <string name="unexpected_error">予期しないエラーが発生しました。</string>
 </resources>

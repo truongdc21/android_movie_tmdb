@@ -18,6 +18,7 @@ package com.truongdc.movie.feature.movieDetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.truongdc.movie.core.data.repository.MovieRepository
+import com.truongdc.movie.core.data.result.asResult
 import com.truongdc.movie.core.model.Movie
 import com.truongdc.movie.core.state.UiStateDelegateImpl
 import com.truongdc.movie.core.viewmodel.UiStateViewModel
@@ -50,11 +51,8 @@ class MovieDetailViewModel @Inject constructor(
 
     sealed interface Event
 
-    fun requestMovie(movieId: Int) {
-        launchTaskSync(isLoading = true, onRequest = {
-            movieRepository.fetchDetailMovies(movieId)
-        }, onSuccess = { movie ->
-            asyncUpdateUiState(viewModelScope) { state -> state.copy(movie = movie) }
-        })
+    fun requestMovie(movieId: Int) = launchSafeTask(maxRetries = 3) {
+        val movie = movieRepository.fetchDetailMovies(movieId).asResult()
+        asyncUpdateUiState(viewModelScope) { state -> state.copy(movie = movie) }
     }
 }

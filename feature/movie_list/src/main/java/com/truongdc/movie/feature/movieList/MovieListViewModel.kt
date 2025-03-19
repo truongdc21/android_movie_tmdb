@@ -20,6 +20,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.truongdc.movie.core.data.repository.MovieRepository
+import com.truongdc.movie.core.data.result.asResult
 import com.truongdc.movie.core.model.Movie
 import com.truongdc.movie.core.state.CombinedStateDelegateImpl
 import com.truongdc.movie.core.state.asyncUpdateInternalState
@@ -54,11 +55,8 @@ class MovieListViewModel @Inject constructor(
         }
     }
 
-    private fun requestMovie() {
-        launchTaskSync(onRequest = {
-            movieRepository.fetchMovies()
-        }, onSuccess = { mFlowPagingMovie ->
-            asyncUpdateInternalState { state -> state.copy(flowPagingMovie = mFlowPagingMovie) }
-        })
+    private fun requestMovie() = launchSafeTask {
+        val mFlowPagingMovie = movieRepository.fetchMovies().asResult()
+        asyncUpdateInternalState { state -> state.copy(flowPagingMovie = mFlowPagingMovie) }
     }
 }

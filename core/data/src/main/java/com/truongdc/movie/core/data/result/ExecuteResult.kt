@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.truongdc.movie.core.common.result
+package com.truongdc.movie.core.data.result
 
 import com.truongdc.movie.core.common.di.annotations.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
@@ -34,9 +34,5 @@ abstract class ExecuteResult(
         } catch (e: Exception) {
             DataResult.Error(e)
         }
-    }
-
-    companion object {
-        const val TAG = "ExecuteResult"
     }
 }

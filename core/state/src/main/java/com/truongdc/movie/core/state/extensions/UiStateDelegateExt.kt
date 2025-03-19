@@ -22,6 +22,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
+import com.truongdc.movie.core.common.exception.base.AppExceptionWrapper
 import com.truongdc.movie.core.state.UiStateDelegate
 import kotlinx.coroutines.flow.FlowCollector
 
@@ -43,7 +44,7 @@ fun <R> UiStateDelegate<R, *>.collectLoadingWithLifecycle(
 )
 
 @Composable
-fun <State, Event> UiStateDelegate<State, Event>.collectEventEffect(
+fun <State, Event> UiStateDelegate<State, Event>.CollectEventEffect(
     lifecycleOwner: LifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current,
     lifecycleState: Lifecycle.State = Lifecycle.State.RESUMED,
     vararg keys: Any?,
@@ -56,13 +57,13 @@ fun <State, Event> UiStateDelegate<State, Event>.collectEventEffect(
 }
 
 @Composable
-fun UiStateDelegate<*, *>.collectErrorEffect(
+fun UiStateDelegate<*, *>.CollectAppExceptionWrapperEffect(
     lifecycleOwner: LifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current,
     lifecycleState: Lifecycle.State = Lifecycle.State.RESUMED,
     vararg keys: Any?,
-    collector: FlowCollector<Throwable>,
+    collector: FlowCollector<AppExceptionWrapper>,
 ) = LaunchedEffect(Unit, *keys) {
-    error.flowWithLifecycle(
+    appExceptionWrapper.flowWithLifecycle(
         lifecycle = lifecycleOwner.lifecycle,
         minActiveState = lifecycleState,
     ).collect(collector)
