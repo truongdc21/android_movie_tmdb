@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.truongdc.movie.core.common.result
+package com.truongdc.movie.core.data.result
 
+import RetrofitExceptionMapper
+import com.truongdc.movie.core.network.error.RetrofitException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 
 /**
  * A generic class that holds a value with its loading status.
@@ -28,13 +29,11 @@ sealed class DataResult<out R> {
 
     data class Success<out T>(val data: T) : DataResult<T>()
     data class Error(val throwable: Throwable) : DataResult<Nothing>()
-    object Loading : DataResult<Nothing>()
 
     inline fun <M> map(block: (R) -> M): DataResult<M> {
         return when (this) {
             is Success -> Success(block(data))
             is Error -> Error(throwable)
-            is Loading -> Loading
         }
     }
 
@@ -42,11 +41,19 @@ sealed class DataResult<out R> {
         return when (this) {
             is Success<*> -> "Success[data=$data]"
             is Error -> "Error[throwable=$throwable]"
-            Loading -> "Loading"
         }
     }
 }
 
 fun <T> Flow<T>.asResult(): Flow<DataResult<T>> = map<T, DataResult<T>> { DataResult.Success(it) }
-    .onStart { emit(DataResult.Loading) }
     .catch { emit(DataResult.Error(it)) }
+
+fun <T> DataResult<T>.asResult(): T {
+    return when (this) {
+        is DataResult.Success -> this.data
+        is DataResult.Error -> {
+            val retrofitException = RetrofitException.convertToRetrofitException(this.throwable)
+            throw RetrofitExceptionMapper().map(retrofitException)
+        }
+    }
+}

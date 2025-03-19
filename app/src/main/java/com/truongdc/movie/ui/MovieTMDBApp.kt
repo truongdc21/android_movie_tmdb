@@ -91,6 +91,7 @@ fun MovieTMDBApp(
             toggleForceUpdateDialog = {},
             toggleMaintenanceMode = {},
             toggleLogoutDialogVisibility = {},
+            toggleErrorDialogVisibility = {},
         )
         if (!hasLaunched.value) {
             LaunchedEffect(Unit) {

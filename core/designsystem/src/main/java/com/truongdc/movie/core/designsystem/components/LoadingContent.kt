@@ -26,7 +26,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 
-@ExperimentalComposeUiApi
 @Composable
 fun LoadingContent(
     isLoading: Boolean,

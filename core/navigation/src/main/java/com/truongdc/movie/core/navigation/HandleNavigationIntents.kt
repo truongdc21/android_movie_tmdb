@@ -47,6 +47,7 @@ fun HandleNavigationIntents(
     toggleForceUpdateDialog: (Boolean) -> Unit,
     toggleMaintenanceMode: (Boolean) -> Unit,
     toggleLogoutDialogVisibility: (Boolean) -> Unit,
+    toggleErrorDialogVisibility: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     val activity = (context as? Activity)
@@ -82,6 +83,10 @@ fun HandleNavigationIntents(
 
                     is NavigationIntent.ToggleLogoutDialog -> {
                         toggleLogoutDialogVisibility(intent.isVisible)
+                    }
+
+                    is NavigationIntent.ToggleErrorDialog -> {
+                        toggleErrorDialogVisibility(intent.isVisible)
                     }
                 }
             }

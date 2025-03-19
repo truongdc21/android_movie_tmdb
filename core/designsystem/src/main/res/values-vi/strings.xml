@@ -54,4 +54,7 @@
     <string name="register_success">Đăng ký thành công</string>
     <string name="register_failed_please_try_again">Đăng ký thất bại, vui lòng thử lại!</string>
     <string name="welcome_to_movie_app">Chào mừng đến với ứng dụng phim!</string>
+    <string name="error">Lỗi</string>
+    <string name="cancel">Hủy</string>
+    <string name="unexpected_error">Đã xảy ra lỗi không mong muốn.</string>
 </resources>

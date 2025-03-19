@@ -17,11 +17,15 @@ package com.truongdc.movie.core.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.truongdc.movie.core.common.result.DataResult
+import com.truongdc.movie.core.common.exception.base.AppException
+import com.truongdc.movie.core.common.exception.base.AppExceptionWrapper
 import com.truongdc.movie.core.navigation.AppNavigator
 import com.truongdc.movie.core.state.UiStateDelegate
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 abstract class BaseViewModel<UiState, Event> : ViewModel() {
@@ -29,28 +33,115 @@ abstract class BaseViewModel<UiState, Event> : ViewModel() {
     @Inject
     lateinit var appNavigator: AppNavigator
 
-    fun <T> UiStateDelegate<UiState, Event>.launchTaskSync(
-        isLoading: Boolean = false,
-        onRequest: suspend CoroutineScope.() -> DataResult<T>,
-        onSuccess: (T) -> Unit = {},
-        onError: (Throwable) -> Unit = {},
-        onCompletion: () -> Unit = {},
+    fun UiStateDelegate<UiState, Event>.launchSafeTask(
+        doOnRetry: (suspend () -> Unit)? = null,
+        doOnError: (suspend (AppException) -> Unit)? = null,
+        doOnSubscribe: (suspend () -> Unit)? = null,
+        doOnSuccessOrError: (suspend () -> Unit)? = null,
+        doOnEventCompleted: (suspend () -> Unit)? = null,
+        handleLoading: Boolean = true,
+        handleError: Boolean = true,
+        handleRetry: Boolean = true,
+        onForceHandleError: ((AppException) -> Boolean)? = null,
+        overrideErrorMessage: String? = null,
+        maxRetries: Int? = null,
+        action: suspend CoroutineScope.() -> Unit,
     ) = viewModelScope.launch {
-        if (isLoading) showLoading()
-        when (val asynchronousTasks = onRequest(this)) {
-            is DataResult.Success -> onSuccess(asynchronousTasks.data)
-            is DataResult.Error -> {
-                val throwable = asynchronousTasks.throwable
-                onError(throwable)
-                onSendError(throwable)
+        runSafeTask(
+            action = action,
+            doOnRetry = doOnRetry,
+            doOnError = doOnError,
+            doOnSubscribe = doOnSubscribe,
+            doOnSuccessOrError = doOnSuccessOrError,
+            doOnEventCompleted = doOnEventCompleted,
+            handleLoading = handleLoading,
+            handleError = handleError,
+            handleRetry = handleRetry,
+            onForceHandleError = onForceHandleError,
+            overrideErrorMessage = overrideErrorMessage,
+            maxRetries = maxRetries,
+            coroutineScope = viewModelScope,
+        )
+    }
+
+    private suspend fun UiStateDelegate<UiState, Event>.runSafeTask(
+        action: suspend CoroutineScope.() -> Unit,
+        doOnRetry: (suspend () -> Unit)? = null,
+        doOnError: (suspend (AppException) -> Unit)? = null,
+        doOnSubscribe: (suspend () -> Unit)? = null,
+        doOnSuccessOrError: (suspend () -> Unit)? = null,
+        doOnEventCompleted: (suspend () -> Unit)? = null,
+        handleLoading: Boolean = true,
+        handleError: Boolean = true,
+        handleRetry: Boolean = true,
+        onForceHandleError: ((AppException) -> Boolean)? = null,
+        overrideErrorMessage: String? = null,
+        maxRetries: Int? = null,
+        coroutineScope: CoroutineScope,
+    ) {
+        require(maxRetries == null || maxRetries > 0) { "maxRetries must be positive" }
+        var recursion: CompletableDeferred<Unit>? = null
+        try {
+            doOnSubscribe?.invoke()
+            if (handleLoading) {
+                showLoading()
             }
 
-            is DataResult.Loading -> {}
+            action(coroutineScope)
+
+            if (handleLoading) {
+                hideLoading()
+            }
+            doOnSuccessOrError?.invoke()
+        } catch (e: AppException) {
+            if (handleLoading) {
+                hideLoading()
+            }
+            doOnSuccessOrError?.invoke()
+            doOnError?.invoke(e)
+
+            if (handleError || (onForceHandleError?.invoke(e) ?: shouldForceHandleError(e))) {
+                sendAppException(
+                    AppExceptionWrapper(
+                        appException = e,
+                        doOnRetry = doOnRetry ?: if (handleRetry && maxRetries != 1) {
+                            {
+                                withContext(NonCancellable) {
+                                    recursion = CompletableDeferred()
+                                    runSafeTask(
+                                        action = action,
+                                        doOnEventCompleted = doOnEventCompleted,
+                                        doOnSubscribe = doOnSubscribe,
+                                        doOnSuccessOrError = doOnSuccessOrError,
+                                        doOnError = doOnError,
+                                        doOnRetry = doOnRetry,
+                                        onForceHandleError = onForceHandleError,
+                                        handleError = handleError,
+                                        handleLoading = handleLoading,
+                                        handleRetry = handleRetry,
+                                        overrideErrorMessage = overrideErrorMessage,
+                                        maxRetries = maxRetries?.minus(1),
+                                        coroutineScope = coroutineScope,
+                                    )
+                                    recursion?.complete(Unit)
+                                }
+                            }
+                        } else {
+                            null
+                        },
+                        exceptionCompleter = CompletableDeferred(),
+                        overrideMessage = overrideErrorMessage,
+                    ),
+                )
+            }
+        } finally {
+            recursion?.await()
+            doOnEventCompleted?.invoke()
         }
-    }.also { job ->
-        job.invokeOnCompletion {
-            onCompletion()
-            if (isLoading) hideLoading()
-        }
+    }
+
+    private fun shouldForceHandleError(appException: AppException): Boolean {
+        // return appException is RemoteException && appException.kind == RemoteExceptionKind.refreshTokenFailed;
+        return false
     }
 }

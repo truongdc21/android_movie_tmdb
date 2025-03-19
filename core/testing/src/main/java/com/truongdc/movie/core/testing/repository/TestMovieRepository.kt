@@ -16,8 +16,8 @@
 package com.truongdc.movie.core.testing.repository
 
 import androidx.paging.PagingData
-import com.truongdc.movie.core.common.result.DataResult
 import com.truongdc.movie.core.data.repository.MovieRepository
+import com.truongdc.movie.core.data.result.DataResult
 import com.truongdc.movie.core.model.Movie
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow

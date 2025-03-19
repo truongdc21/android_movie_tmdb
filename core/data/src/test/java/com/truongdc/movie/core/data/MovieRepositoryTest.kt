@@ -15,8 +15,8 @@
  */
 package com.truongdc.movie.core.data
 
-import com.truongdc.movie.core.common.result.DataResult
 import com.truongdc.movie.core.data.repository.impl.MovieRepositoryImpl
+import com.truongdc.movie.core.data.result.DataResult
 import com.truongdc.movie.core.data.testdoubles.TestMovieNetworkDataSource
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.TestScope

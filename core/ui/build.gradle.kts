@@ -27,6 +27,7 @@ dependencies {
     api(libs.androidx.metrics)
     api(projects.core.viewmodel)
     api(projects.core.designsystem)
+    implementation(projects.core.navigation)
     implementation(libs.androidx.metrics)
     androidTestImplementation(libs.bundles.androidx.compose.ui.test)
 }
